@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=4 python test_quant_FDD.py --model deit_small --dataset /bfs/ngr/lmb/imagenet --mode 3 --w_bit 8 --a_bit 8 --seed 444
