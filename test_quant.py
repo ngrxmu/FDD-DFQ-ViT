@@ -69,6 +69,15 @@ def seed(seed=0):
     np.random.seed(seed)
     random.seed(seed)
 
+def save_data(calibrate_data, args, t='syn'):
+    if not os.path.exists('calibrate_data'):
+        os.mkdir('calibrate_data')
+    torch.save(calibrate_data, f"calibrate_data/{args.model}_{t}.pt")
+
+def load_data(args, t='syn'):
+    calibrate_data = torch.load(f"calibrate_data/{args.model}_{t}.pt")
+    return calibrate_data
+
 
 def main():
     print(args)
@@ -97,18 +106,26 @@ def main():
         print("Calibrating with generated data...")
         with torch.no_grad():
             output = model(calibrate_data)
+        save_data(calibrate_data, args, t='syn')
     # Case 1: Gaussian noise
     elif args.mode == 1:
         calibrate_data = torch.randn((args.calib_batchsize, 3, 224, 224)).to(device)
         print("Calibrating with Gaussian noise...")
         with torch.no_grad():
             output = model(calibrate_data)
+        save_data(calibrate_data, args, t='noise')
     # Case 2: Real data (Standard)
     elif args.mode == 2:
         for data, target in train_loader:
             calibrate_data = data.to(device)
             break
         print("Calibrating with real data...")
+        with torch.no_grad():
+            output = model(calibrate_data)
+        save_data(calibrate_data, args, t='real')
+    elif args.mode == 3:
+        calibrate_data = load_data(args)
+        print("Calibrating with local data...")
         with torch.no_grad():
             output = model(calibrate_data)
     # Not implemented

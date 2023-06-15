@@ -27,13 +27,24 @@ class AttentionMap:
     def remove(self):
         self.hook.remove()
 
-def fftmask(h, w, r):
-    lmask = torch.zeros((h, w))
-    for i in range(h):
-        for j in range(w):
-            if ((i - (h - 1) / 2) ** 2 + (j - (w - 1) / 2) ** 2 < r ** 2):
+def fftmask(r1, r2, r3):
+    # r1 is low frequency up radius
+    # r2 is high frequency up radius
+    # r3 is high frequency down radius
+    S = 224
+    R = S // 2
+    R1 = R * r1
+    R2 = R * r2
+    R3 = R * r3
+    lmask = torch.zeros((S, S))
+    hmask = torch.zeros((S, S))
+    for i in range(S):
+        for j in range(S):
+            dis = (i - (S - 1) / 2) ** 2 + (j - (S - 1) / 2) ** 2
+            if (dis <= R1 ** 2):
                 lmask[i, j] = 1
-    hmask = 1 - lmask
+            if (dis <= R2 ** 2 and dis >= R3 ** 2):
+                hmask[i, j] = 1
     lmask, hmask = lmask.cuda(), hmask.cuda()
     return lmask, hmask
 
@@ -91,60 +102,45 @@ def generate_data(args):
     criterion = nn.CrossEntropyLoss()
     KL_Loss = nn.KLDivLoss(reduction = 'batchmean')
 
-    # Get frequency domain mask
-    lmask, _ = fftmask(img.shape[-2], img.shape[-1], 112 * 0.7)
-    _, hmask = fftmask(img.shape[-2], img.shape[-1], 112 * 0.1)
-
-    # AdaIteration
-    if 'tiny' in args.model:
-        iterations = 100
-    elif 'swin_small' in args.model:
-        iterations = 200
-    else:
-        iterations = 300
+    # Set frequency radius config
+    radius = [[0.2, 0.4, 0.1], [0.3, 0.5, 0.2], 
+              [0.4, 0.6, 0.3], [0.5, 0.7, 0.4], 
+              [0.6, 1, 0]]
 
     # Train for two epochs
-    for lr_it in range(3):
-        if lr_it == 0:
-            iterations_per_layer = iterations
-            lim = int(112 * 0.3)
-        elif lr_it == 1:
-            iterations_per_layer = iterations
-            lim = int(112 * 0.2)
-        else:
-            iterations_per_layer = iterations
-            lim = int(112 * 0.1)
+    for lr_it in range(5):
+        iterations_per_layer = 200
+        lim = int(112 * 0.3 * (lr_it / 5))
 
-        lr_scheduler = lr_cosine_policy(args.lr, iterations // 5, iterations_per_layer)
+        # Get frequency domain mask
+        lmask, hmask = fftmask(radius[lr_it][0], radius[lr_it][1], radius[lr_it][2])
+
+        lr_scheduler = lr_cosine_policy(args.lr, 40, iterations_per_layer)
 
         with tqdm(range(iterations_per_layer)) as pbar:
             for sss, itr in enumerate(pbar):
-                pbar.set_description(f"Epochs {lr_it+1}/{3}")
+                pbar.set_description(f"Epochs {lr_it+1}/{5}")
 
                 # Learning rate scheduling
                 lr_scheduler(optimizer, itr, itr)
 
                 # fft to get img_l, img_h or org img as input
                 img_l, img_h = imgfft(img, lmask, hmask)
-                if lr_it == 0:
+                if sss < 100:
                     img_input = img_l
-                elif lr_it == 1:
-                    img_input = img_h
                 else:
-                    img_input = img
+                    img_input = img_h
 
                 # Apply random jitter offsets (from DeepInversion[1])
                 # [1] Yin, Hongxu, et al. "Dreaming to distill: Data-free knowledge transfer via deepinversion.", CVPR2020.
                 off = random.randint(-lim, lim)
                 img_jit = torch.roll(img_input, shifts=(off, off), dims=(2, 3))
                 img_jit_l = torch.roll(img_l, shifts=(off, off), dims=(2, 3))
-                img_jit_h = torch.roll(img_h, shifts=(off, off), dims=(2, 3))
                 # Flipping
                 flip = random.random() > 0.5
                 if flip:
                     img_jit = torch.flip(img_jit, dims=(3,))
                     img_jit_l = torch.flip(img_jit_l, dims=(3,))
-                    img_jit_h = torch.flip(img_jit_h, dims=(3,))
 
                 # Forward pass
                 optimizer.zero_grad()
@@ -152,7 +148,7 @@ def generate_data(args):
 
                 output = p_model(img_jit)
 
-                if lr_it == 0:
+                if sss < 100:
                     loss_kl = torch.zeros(1).cuda()
                 else:
                     teacher_output = p_model(img_jit_l).clone().softmax(dim=-1).detach()
@@ -161,7 +157,7 @@ def generate_data(args):
 
                 loss_hard = criterion(output, pred)
 
-                if lr_it == 0:
+                if sss < 100:
                     loss_oh = loss_hard
                 else:
                     loss_oh = loss_hard * 0.5 + loss_kl * 0.5
@@ -188,12 +184,12 @@ def generate_data(args):
                 total_loss = loss_entropy + loss_oh + 0.05 * loss_tv
 
                 # Record loss
-                writer.add_scalar('Total Loss', total_loss.item(), global_step=lr_it*100+sss)
-                writer.add_scalar('OH Loss', loss_oh.item(), global_step=lr_it*100+sss)
-                writer.add_scalar('Hard Loss', loss_hard.item(), global_step=lr_it*100+sss)
-                writer.add_scalar('KL Loss', loss_kl.item(), global_step=lr_it*100+sss)
-                writer.add_scalar('Entropy Loss', loss_entropy.item(), global_step=lr_it*100+sss)
-                writer.add_scalar('TV Loss', loss_tv.item(), global_step=lr_it*100+sss)
+                writer.add_scalar('Total Loss', total_loss.item(), global_step=lr_it*iterations_per_layer+sss)
+                writer.add_scalar('OH Loss', loss_oh.item(), global_step=lr_it*iterations_per_layer+sss)
+                writer.add_scalar('Hard Loss', loss_hard.item(), global_step=lr_it*iterations_per_layer+sss)
+                writer.add_scalar('KL Loss', loss_kl.item(), global_step=lr_it*iterations_per_layer+sss)
+                writer.add_scalar('Entropy Loss', loss_entropy.item(), global_step=lr_it*iterations_per_layer+sss)
+                writer.add_scalar('TV Loss', loss_tv.item(), global_step=lr_it*iterations_per_layer+sss)
 
                 # Do image update
                 total_loss.backward()

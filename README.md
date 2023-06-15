@@ -28,60 +28,66 @@ bash command_FDD.sh
 bash command.sh
 ```
 ## Results
-### swin_tiny (seed 666 epoch 100)
-|method|bit(wa)|acc(top1)|epoch|
-|:-:|:-:|:-:|:-:|
-|Noise|48|1.058|--|
-|Real|48|69.042|--|
-|PSAQ|48|69.082|1000|
-|Ours|48|**72.156**|**300**|
-|Noise|88|1.608|--|
-|Real|88|73.742|--|
-|PSAQ|88|73.324|1000|
-|Ours|88|**75.494**|**300**|
-### swin_small (seed 444 epoch 200)
-|method|bit(wa)|acc(top1)|epoch|
-|:-:|:-:|:-:|:-:|
-|Noise|48|0.736|--|
-|Real|48|71.258|--|
-|PSAQ|48|74.892|1000|
-|Ours|48|**75.286**|**600**|
-|Noise|88|0.796|--|
-|Real|88|73.574|--|
-|PSAQ|88|76.538|1000|
-|Ours|88|**76.846**|**600**|
-### deit_tiny (seed 666 epoch 100)
-|method|bit(wa)|acc(top1)|epoch|
-|:-:|:-:|:-:|:-:|
-|Noise|48|14.758|--|
-|Real|48|65.192|--|
-|PSAQ|48|65.592|1000|
-|Ours|48|**65.768**|**300**|
-|Noise|88|17.710|--|
-|Real|88|71.270|--|
-|PSAQ|88|71.554|1000|
-|Ours|88|**71.670**|**300**|
-### deit_small (seed 444 epoch 300)
+
+### swin_tiny (seed 444)
+|method|bit(wa)|acc(top1)
+|:-:|:-:|:-:|
+|Noise|48|0.474|
+|Real|48|70.980|
+|PSAQ|48|71.480|
+|Ours|48|**72.420**|
+|Noise|88|0.510|
+|Real|88|74.712|
+|PSAQ|88|75.004|
+|Ours|88|**75.938**|
+
+### swin_small (seed 444)
+|method|bit(wa)|acc(top1)|
+|:-:|:-:|:-:|
+|Noise|48|0.736|
+|Real|48|71.258|
+|PSAQ|48|74.892|
+|Ours|48|**75.126**|
+|Noise|88|0.796｜
+|Real|88|73.574|
+|PSAQ|88|76.538|
+|Ours|88|**76.698**|
+
+### deit_tiny (seed 444 222)
+|method|bit(wa)|acc(top1)|
+|:-:|:-:|:-:|
+|Noise|48|7.828|
+|Real|48|65.248|
+|PSAQ|48|65.682|
+|Ours|48|**65.708**|
+|Noise|88|10.306|
+|Real|88|71.210|
+|PSAQ|88|71.618|
+|Ours|88|**71.692**|
+
+### deit_small (seed 444 333)
 |method|bit(wa)|acc(top1)|epoch|
 |:-:|:-:|:-:|:-:|
 |Noise|48|7.570|--|
 |Real|48|72.338|--|
 |PSAQ|48|72.324|1000|
-|Ours|48|**72.452**|**900**|
+|Ours|48|**72.442**|**900**|
 |Noise|88|11.858|--|
 |Real|88|76.132|--|
 |PSAQ|88|76.172|1000|
-|Ours|88|**76.288**|**900**|
-### deit_base (seed 444 555 epoch 300)
-|method|bit(wa)|acc(top1)|epoch|
-|:-:|:-:|:-:|:-:|
-|Noise|48|12.142|--|
-|Real|48|76.280|--|
-|PSAQ|48|76.526|1000|
-|Ours|48|**77.160**|**900**|
-|Noise|88|15.732|--|
-|Real|88|78.684|--|
-|PSAQ|88|78.964|1000|
-|Ours|88|**79.384**|**900**|
+|Ours|88|**76.284**|**900**|
+
+### deit_base (seed 444 555)
+|method|bit(wa)|acc(top1)|
+|:-:|:-:|:-:|
+|Noise|48|12.142|
+|Real|48|76.280|
+|PSAQ|48|76.526|
+|Ours|48|**76.730**|
+|Noise|88|15.732|
+|Real|88|78.684|
+|PSAQ|88|78.964|
+|Ours|88|**79.294**|
+
 ## Acknowledgement
 Thanks to Zhikai for his excellent work [PSAQ](https://arxiv.org/abs/2203.02250) and [code](https://github.com/zkkli/PSAQ-ViT).

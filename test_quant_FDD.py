@@ -169,15 +169,15 @@ def main():
             output = model(calibrate_data)
         save_data(calibrate_data, args)
         save_min_max(model, args)
-        visualization(calibrate_data, args)
+        # visualization(calibrate_data, args)
     # Case 1: Gaussian noise
     elif args.mode == 1:
         calibrate_data = torch.randn((args.calib_batchsize, 3, 224, 224)).to(device)
         print("Calibrating with Gaussian noise...")
         with torch.no_grad():
             output = model(calibrate_data)
-        save_min_max(model, args, 'noise')
-        visualization(calibrate_data, args, 'noise')
+        # save_min_max(model, args, 'noise')
+        # visualization(calibrate_data, args, 'noise')
     # Case 2: Real data (Standard)
     elif args.mode == 2:
         for data, target in train_loader:
@@ -186,8 +186,8 @@ def main():
         print("Calibrating with real data...")
         with torch.no_grad():
             output = model(calibrate_data)
-        save_min_max(model, args, 'real')
-        visualization(calibrate_data, args, 'real')
+        # save_min_max(model, args, 'real')
+        # visualization(calibrate_data, args, 'real')
     # Case 3: load data from local
     elif args.mode == 3:
         calibrate_data = load_data(args)
