@@ -3,13 +3,13 @@
 Coming soon...
 ## Environment
 1. python 3.9.7
-2. pytorch 1.12.1
+2. torch 1.12.1
 3. torchvision 0.13.1
 4. timm 0.5.4
 5. pandas 1.3.4
 6. tensorboard 2.9.1
 
-We recommend install from pytorch's official website [here](https://pytorch.org/get-started/locally/)
+We recommend install 'torch' and 'torchvision' from pytorch's official website [here](https://pytorch.org/get-started/locally/).
 ## Run
 1. Modify [command_FDD.sh](command_FDD.sh)(ours) or [command.sh](command.sh)(PSAQ)
 ```
@@ -84,4 +84,4 @@ bash command.sh
 |PSAQ|88|78.964|1000|
 |Ours|88|**79.384**|**900**|
 ## Acknowledgement
-Thanks to Zhikai for his excellent work [PSAQ](https://arxiv.org/abs/2203.02250) and [code](https://github.com/zkkli/PSAQ-ViT)
+Thanks to Zhikai for his excellent work [PSAQ](https://arxiv.org/abs/2203.02250) and [code](https://github.com/zkkli/PSAQ-ViT).
