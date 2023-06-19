@@ -6,7 +6,6 @@ import random
 import torch
 import torch.nn as nn
 import numpy as np
-import pandas as pd
 
 from models import *
 from utils import *
@@ -69,20 +68,6 @@ def seed(seed=0):
     np.random.seed(seed)
     random.seed(seed)
 
-def save_min_max(model, args, s='syn'):
-    from models.quantization_utils.quant_modules import QuantAct
-    if not os.path.exists('min_max'):
-        os.mkdir('min_max')
-    min = []
-    max = []
-    for name, module in model.named_modules():
-        if isinstance(module, QuantAct):
-            min.append(module.x_min.item())
-            max.append(module.x_max.item())
-    min_max = {'min': min, 'max': max}
-    df = pd.DataFrame(min_max)
-    df.to_csv('min_max/'+args.model+f'_{s}.csv')
-
 def save_data(calibrate_data, args):
     if not os.path.exists('calibrate_data'):
         os.mkdir('calibrate_data')
@@ -91,54 +76,6 @@ def save_data(calibrate_data, args):
 def load_data(args):
     calibrate_data = torch.load(f"calibrate_data/{args.model}.pt")
     return calibrate_data
-
-def visualization(calibrate_data, args, s='syn'):
-    model_zoo = {'deit_tiny': 'deit_tiny_patch16_224',
-                'deit_small': 'deit_small_patch16_224',
-                'deit_base': 'deit_base_patch16_224',
-                'swin_tiny': 'swin_tiny_patch4_window7_224',
-                'swin_small': 'swin_small_patch4_window7_224',
-                }
-    device = torch.device(args.device)
-    p_model = build_model(model_zoo[args.model], Pretrained=True).to(device)
-    p_model.eval()
-
-    if not os.path.exists('visualization'):
-        os.mkdir('visualization')
-
-    if not os.path.exists('visualization/'+args.model):
-        os.mkdir('visualization/'+args.model)
-
-    from generate_data import AttentionMap
-    # Hook the feature map
-    hooks = []
-    if 'swin' in args.model:
-        for m in p_model.layers:
-            for n in range(len(m.blocks)):
-                hooks.append(AttentionMap(m.blocks[n].attn.matmul2))
-    else:
-        for m in p_model.blocks:
-            hooks.append(AttentionMap(m.attn.matmul2))
-    # Hook the attention map
-    hooks2 = []
-    if 'swin' in args.model:
-        for m in p_model.layers:
-            for n in range(len(m.blocks)):
-                hooks2.append(AttentionMap(m.blocks[n].attn.matmul1))
-    else:
-        for m in p_model.blocks:
-            hooks2.append(AttentionMap(m.attn.matmul1))
-
-    _ = p_model(calibrate_data)
-    for itr_hook in range(len(hooks)):
-        feature = hooks[itr_hook].feature[..., 1:, :]
-        map = hooks2[itr_hook].feature[..., 1:, 1:].softmax(dim=-1)
-        import cv2 as cv
-        for itr_head in range(map.shape[1]):
-            cv.imwrite(f'visualization/{args.model}/map_{itr_hook}_{itr_head}_{s}.jpg', 
-                       (map[0,itr_head,:,:]*255).cpu().detach().numpy())
-            cv.imwrite(f'visualization/{args.model}/feature_{itr_hook}_{itr_head}_{s}.jpg', 
-                       (feature[0,itr_head,:,:]*255).cpu().detach().numpy())
 
 def main():
     print(args)
@@ -168,16 +105,12 @@ def main():
         with torch.no_grad():
             output = model(calibrate_data)
         save_data(calibrate_data, args)
-        save_min_max(model, args)
-        # visualization(calibrate_data, args)
     # Case 1: Gaussian noise
     elif args.mode == 1:
         calibrate_data = torch.randn((args.calib_batchsize, 3, 224, 224)).to(device)
         print("Calibrating with Gaussian noise...")
         with torch.no_grad():
             output = model(calibrate_data)
-        # save_min_max(model, args, 'noise')
-        # visualization(calibrate_data, args, 'noise')
     # Case 2: Real data (Standard)
     elif args.mode == 2:
         for data, target in train_loader:
@@ -186,8 +119,6 @@ def main():
         print("Calibrating with real data...")
         with torch.no_grad():
             output = model(calibrate_data)
-        # save_min_max(model, args, 'real')
-        # visualization(calibrate_data, args, 'real')
     # Case 3: load data from local
     elif args.mode == 3:
         calibrate_data = load_data(args)
@@ -201,7 +132,6 @@ def main():
     # Quant and freeze model
     model.model_quant()
     model.model_freeze()
-    # print(model)
     
     # Validate the quantized model
     print("Validating...")

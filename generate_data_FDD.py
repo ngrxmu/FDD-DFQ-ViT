@@ -28,9 +28,9 @@ class AttentionMap:
         self.hook.remove()
 
 def fftmask(r1, r2, r3):
-    # r1 is low frequency up radius
-    # r2 is high frequency up radius
-    # r3 is high frequency down radius
+    # r1 is outside diameter of low-frequency
+    # r2 is outside diameter of high-frequency
+    # r3 is inside diameter of high-frequency
     S = 224
     R = S // 2
     R1 = R * r1
@@ -102,7 +102,7 @@ def generate_data(args):
     criterion = nn.CrossEntropyLoss()
     KL_Loss = nn.KLDivLoss(reduction = 'batchmean')
 
-    # Set frequency radius config
+    # Set frequency radius rate config
     radius = [[0.2, 0.4, 0.1], [0.3, 0.5, 0.2], 
               [0.4, 0.6, 0.3], [0.5, 0.7, 0.4], 
               [0.6, 1, 0]]
