@@ -75,7 +75,10 @@ def save_data(calibrate_data, args, t='syn'):
     torch.save(calibrate_data, f"calibrate_data/{args.model}_{t}.pt")
 
 def load_data(args, t='syn'):
-    calibrate_data = torch.load(f"calibrate_data/{args.model}_{t}.pt")
+    if t == 'fdd':
+        calibrate_data = torch.load(f"calibrate_data/{args.model}.pt")
+    else:
+        calibrate_data = torch.load(f"calibrate_data/{args.model}_{t}.pt")
     return calibrate_data
 
 

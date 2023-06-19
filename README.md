@@ -6,8 +6,7 @@ Coming soon...
 2. torch 1.12.1
 3. torchvision 0.13.1
 4. timm 0.5.4
-5. pandas 1.3.4
-6. tensorboard 2.9.1
+5. tensorboard 2.9.1
 
 We recommend install 'torch' and 'torchvision' from pytorch's official website [here](https://pytorch.org/get-started/locally/).
 ## Run
@@ -29,7 +28,7 @@ bash command.sh
 ```
 ## Results
 
-### swin_tiny (seed 444)
+### swin_tiny
 |method|bit(wa)|acc(top1)
 |:-:|:-:|:-:|
 |Noise|48|0.474|
@@ -41,7 +40,7 @@ bash command.sh
 |PSAQ|88|75.004|
 |Ours|88|**75.938**|
 
-### swin_small (seed 444)
+### swin_small
 |method|bit(wa)|acc(top1)|
 |:-:|:-:|:-:|
 |Noise|48|0.736|
@@ -53,7 +52,7 @@ bash command.sh
 |PSAQ|88|76.538|
 |Ours|88|**76.698**|
 
-### deit_tiny (seed 444 222)
+### deit_tiny
 |method|bit(wa)|acc(top1)|
 |:-:|:-:|:-:|
 |Noise|48|7.828|
@@ -65,7 +64,7 @@ bash command.sh
 |PSAQ|88|71.618|
 |Ours|88|**71.692**|
 
-### deit_small (seed 444 333)
+### deit_small
 |method|bit(wa)|acc(top1)|
 |:-:|:-:|:-:|
 |Noise|48|7.570|
@@ -77,7 +76,7 @@ bash command.sh
 |PSAQ|88|76.172|
 |Ours|88|**76.284**|
 
-### deit_base (seed 444 555)
+### deit_base
 |method|bit(wa)|acc(top1)|
 |:-:|:-:|:-:|
 |Noise|48|12.142|
