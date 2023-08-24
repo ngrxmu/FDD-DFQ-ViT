@@ -1,7 +1,7 @@
 # The Code for PRCV2023 paper "Frequency Domain Distillation for Data-Free Quantization of Vision Transformer"
 ## The overview of our method
-![pipeline](./fig/pipeline.pdf)
-![decomposer](./fig/decomposer.pdf)
+![pipeline](fig/pipeline.png)
+![decomposer](fig/decomposer.png)
 ## Environment
 1. python 3.9.7
 2. torch 1.12.1
