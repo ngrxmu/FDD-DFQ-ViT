@@ -1,4 +1,4 @@
-# The Repo of Frequency Domain Distillation for Data-Free Quantization of Vision Transformer
+# The Code for PRCV2023 paper "Frequency Domain Distillation for Data-Free Quantization of Vision Transformer"
 ## The overview of our method
 Coming soon...
 ## Environment
